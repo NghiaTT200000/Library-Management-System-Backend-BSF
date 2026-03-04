@@ -9,5 +9,5 @@ public class LibraryManagementArtifactApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(LibraryManagementArtifactApplication.class, args);
 	}
-
+	
 }
