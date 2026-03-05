@@ -1,5 +1,6 @@
 package com.library_management.library_management_artifact.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -107,6 +108,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<ApiResponse<UserResponse>> me(
             @AuthenticationPrincipal User user
     ) {
@@ -117,6 +119,7 @@ public class AuthController {
     }
 
     @PutMapping("/change-password")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<ApiResponse<Void>> changePassword(
             @AuthenticationPrincipal User user,
             @Valid @RequestBody ChangePasswordRequest request

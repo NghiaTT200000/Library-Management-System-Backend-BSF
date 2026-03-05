@@ -18,13 +18,13 @@ import com.library_management.library_management_artifact.exception.EmailNotVeri
 import com.library_management.library_management_artifact.exception.ForbiddenException;
 import com.library_management.library_management_artifact.exception.InvalidRefreshTokenException;
 import com.library_management.library_management_artifact.exception.ResourceNotFoundException;
+import com.library_management.library_management_artifact.config.AppProperties;
 import com.library_management.library_management_artifact.mapper.UserMapper;
 import com.library_management.library_management_artifact.repository.EmailVerificationTokenRepository;
 import com.library_management.library_management_artifact.repository.RefreshTokenRepository;
 import com.library_management.library_management_artifact.repository.UserRepository;
 import com.library_management.library_management_artifact.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -48,12 +48,7 @@ public class AuthService implements UserDetailsService {
     private final JwtUtils jwtUtils;
     private final UserMapper userMapper;
     private final EmailService emailService;
-
-    @Value("${app.email-verification.expiry-minutes}")
-    private long verificationExpiryMinutes;
-
-    @Value("${app.jwt.refresh-token-expiry-ms}")
-    private long refreshTokenExpiryMs;
+    private final AppProperties appProperties;
 
     // Called by JwtAuthenticationFilter on every authenticated request
     @Override
@@ -232,7 +227,7 @@ public class AuthService implements UserDetailsService {
         EmailVerificationToken evt = EmailVerificationToken.builder()
                 .token(token)
                 .user(user)
-                .expiresAt(LocalDateTime.now().plusMinutes(verificationExpiryMinutes))
+                .expiresAt(LocalDateTime.now().plusMinutes(appProperties.getEmailVerification().getExpiryMinutes()))
                 .build();
         verificationTokenRepository.save(evt);
         emailService.sendVerificationEmail(user.getEmail(), user.getFullName(), token);
@@ -243,7 +238,7 @@ public class AuthService implements UserDetailsService {
         RefreshToken rt = RefreshToken.builder()
                 .token(raw)
                 .user(user)
-                .expiresAt(LocalDateTime.now().plusSeconds(refreshTokenExpiryMs / 1000))
+                .expiresAt(LocalDateTime.now().plusSeconds(appProperties.getJwt().getRefreshTokenExpiryMs() / 1000))
                 .build();
         refreshTokenRepository.save(rt);
         return raw;

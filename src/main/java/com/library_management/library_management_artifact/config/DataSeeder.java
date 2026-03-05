@@ -29,14 +29,14 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (userRepository.count() > 0) return; // skip if already seeded
+        if (userRepository.count() > 0) return; 
 
-        // --- Users ---
         userRepository.save(User.builder()
             .email("admin@library.com")
             .password(passwordEncoder.encode("admin123"))
             .fullName("Library Admin")
             .role(Role.ADMIN)
+            .isVerified(true)
             .build());
 
         userRepository.save(User.builder()
@@ -44,16 +44,15 @@ public class DataSeeder implements CommandLineRunner {
             .password(passwordEncoder.encode("member123"))
             .fullName("John Doe")
             .role(Role.MEMBER)
+            .isVerified(true)
             .build());
 
-        // --- Categories ---
         Category fiction    = categoryRepository.save(new Category("Fiction"));
         Category science    = categoryRepository.save(new Category("Science"));
         Category technology = categoryRepository.save(new Category("Technology"));
         Category selfHelp   = categoryRepository.save(new Category("Self-Help"));
         Category classic    = categoryRepository.save(new Category("Classic"));
 
-        // --- Books ---
         bookRepository.save(Book.builder()
             .isbn("978-0-13-468599-1")
             .title("Clean Code")
