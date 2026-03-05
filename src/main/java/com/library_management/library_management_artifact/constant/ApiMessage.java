@@ -23,7 +23,15 @@ public enum ApiMessage {
     LOGOUT_SUCCESS("Logged out successfully",true,  HttpStatus.OK),
     INVALID_REFRESH_TOKEN("Invalid or expired refresh token",      false, HttpStatus.UNAUTHORIZED),
 
-    USER_FETCHED      ("User fetched successfully",true,  HttpStatus.OK),
+    USER_CREATED      ("User created successfully",        true,  HttpStatus.CREATED),
+    USER_FETCHED      ("User fetched successfully",        true,  HttpStatus.OK),
+    USERS_FETCHED     ("Users fetched successfully",       true,  HttpStatus.OK),
+    USER_DEACTIVATED  ("User deactivated successfully",    true,  HttpStatus.OK),
+    PASSWORD_CHANGED  ("Password changed successfully",    true,  HttpStatus.OK),
+
+    ACCOUNT_DISABLED        ("Your account has been disabled. Please contact support.", false, HttpStatus.FORBIDDEN),
+    INVALID_CURRENT_PASSWORD("Current password is incorrect",                           false, HttpStatus.BAD_REQUEST),
+
     NOT_FOUND("Resource not found",false, HttpStatus.NOT_FOUND),
     FORBIDDEN("You do not have permission to do this",false, HttpStatus.FORBIDDEN),
     BAD_REQUEST("Bad request",false, HttpStatus.BAD_REQUEST),

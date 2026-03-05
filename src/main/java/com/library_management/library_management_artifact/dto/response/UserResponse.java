@@ -18,6 +18,6 @@ public class UserResponse {
     private String fullName;
     private String phoneNumber;
     private String role;
-    private boolean emailVerified;
+    private boolean active;
     private LocalDateTime createdAt;
 }

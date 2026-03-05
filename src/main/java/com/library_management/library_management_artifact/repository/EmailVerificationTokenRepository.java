@@ -9,7 +9,7 @@ import com.library_management.library_management_artifact.entity.EmailVerificati
 import com.library_management.library_management_artifact.entity.User;
 
 public interface EmailVerificationTokenRepository extends JpaRepository<EmailVerificationToken, UUID> {
-    Optional<EmailVerificationToken> findbyToken(String token);
+    Optional<EmailVerificationToken> findByToken(String token);
+    boolean existsByUser(User user);
     void deleteByUser(User user);
-    
 }
