@@ -5,9 +5,10 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.library_management.library_management_artifact.entity.RefreshToken;
 import com.library_management.library_management_artifact.entity.User;
 
-public interface UserRepository extends JpaRepository<User, UUID> {
-    Optional<User> findByEmail(String email);
-    boolean existsByEmail(String email);
+public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID> {
+    Optional<RefreshToken> findByToken(String token);
+    void deleteByUser(User user);
 }
