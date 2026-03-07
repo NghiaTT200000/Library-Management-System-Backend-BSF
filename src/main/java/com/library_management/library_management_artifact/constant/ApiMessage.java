@@ -48,6 +48,15 @@ public enum ApiMessage {
     CATEGORY_FETCHED    ("Category fetched successfully",       true,  HttpStatus.OK),
     CATEGORIES_FETCHED  ("Categories fetched successfully",     true,  HttpStatus.OK),
 
+    BORROW_CREATED      ("Book borrowed successfully",          true,  HttpStatus.CREATED),
+    BORROW_RETURNED     ("Book returned successfully",          true,  HttpStatus.OK),
+    BORROW_FETCHED      ("Borrow record fetched successfully",  true,  HttpStatus.OK),
+    BORROWS_FETCHED     ("Borrow records fetched successfully", true,  HttpStatus.OK),
+
+    FINE_FETCHED        ("Fine fetched successfully",           true,  HttpStatus.OK),
+    FINES_FETCHED       ("Fines fetched successfully",          true,  HttpStatus.OK),
+    FINE_PAID           ("Fine marked as paid successfully",    true,  HttpStatus.OK),
+
     NOT_FOUND("Resource not found",false, HttpStatus.NOT_FOUND),
     FORBIDDEN("You do not have permission to do this",false, HttpStatus.FORBIDDEN),
     BAD_REQUEST("Bad request",false, HttpStatus.BAD_REQUEST),
