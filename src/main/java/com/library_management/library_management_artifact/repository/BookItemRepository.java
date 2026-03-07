@@ -14,4 +14,6 @@ public interface BookItemRepository extends JpaRepository<BookItem, UUID> {
     List<BookItem> findByBookId(UUID bookId);
     List<BookItem> findByBookIdAndStatus(UUID bookId, BookItemStatus status);
     boolean existsByItemCode(String itemCode);
+    long countByBookId(UUID bookId);
+    long countByBookIdAndStatus(UUID bookId, BookItemStatus status);
 }

@@ -37,6 +37,9 @@ spring:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    try-it-out-enabled: true
   api-docs:
     path: /v3/api-docs
 
@@ -74,3 +77,7 @@ app:
     api-key: ${CLOUDINARY_API_KEY}
     api-secret: ${CLOUDINARY_API_SECRET}
     upload-folder: library/covers
+  swagger:
+    title: Library Management API
+    version: 1.0.0
+    description: Library Management System REST API

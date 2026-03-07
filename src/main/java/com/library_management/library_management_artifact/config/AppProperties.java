@@ -19,6 +19,7 @@ public class AppProperties {
     private Fine fine = new Fine();
     private Cors cors = new Cors();
     private Cloudinary cloudinary = new Cloudinary();
+    private Swagger swagger = new Swagger();
 
     @Data
     public static class Jwt {
@@ -60,5 +61,12 @@ public class AppProperties {
         private String apiKey;
         private String apiSecret;
         private String uploadFolder = "library/covers";
+    }
+
+    @Data
+    public static class Swagger {
+        private String title = "Library Management API";
+        private String version = "1.0.0";
+        private String description = "Library Management System REST API";
     }
 }

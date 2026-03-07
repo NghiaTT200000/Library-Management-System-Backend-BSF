@@ -7,11 +7,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.library_management.library_management_artifact.dto.request.BookItemRequest;
+import com.library_management.library_management_artifact.dto.response.BookItemDetailResponse;
 import com.library_management.library_management_artifact.dto.response.BookItemResponse;
 import com.library_management.library_management_artifact.entity.BookItem;
 import com.library_management.library_management_artifact.entity.BookItemStatus;
+import com.library_management.library_management_artifact.entity.ItemCondition;
 import com.library_management.library_management_artifact.exception.BadRequestException;
 import com.library_management.library_management_artifact.exception.ResourceNotFoundException;
+import com.library_management.library_management_artifact.mapper.BookItemDetailMapper;
 import com.library_management.library_management_artifact.mapper.BookItemMapper;
 import com.library_management.library_management_artifact.repository.BookItemRepository;
 import com.library_management.library_management_artifact.repository.BookRepository;
@@ -25,17 +28,21 @@ public class BookItemService {
     private final BookItemRepository bookItemRepository;
     private final BookRepository bookRepository;
     private final BookItemMapper bookItemMapper;
+    private final BookItemDetailMapper bookItemDetailMapper;
 
+    @Transactional(readOnly = true)
     public List<BookItemResponse> getByBookId(UUID bookId) {
         return bookItemMapper.toResponseList(bookItemRepository.findByBookId(bookId));
     }
 
-    public BookItemResponse getById(UUID id) {
-        return bookItemMapper.toResponse(findOrThrow(id));
+    @Transactional(readOnly = true)
+    public BookItemDetailResponse getById(UUID id) {
+        return bookItemDetailMapper.toDetailResponse(findOrThrow(id));
     }
 
-    public BookItemResponse getByItemCode(String itemCode) {
-        return bookItemMapper.toResponse(
+    @Transactional(readOnly = true)
+    public BookItemDetailResponse getByItemCode(String itemCode) {
+        return bookItemDetailMapper.toDetailResponse(
                 bookItemRepository.findByItemCode(itemCode)
                         .orElseThrow(() -> new ResourceNotFoundException("Book item not found")));
     }
@@ -53,7 +60,7 @@ public class BookItemService {
                 .locationCode(request.getLocationCode())
                 .description(request.getDescription())
                 .acquiredAt(request.getAcquiredAt())
-                .condition(request.getCondition() != null ? request.getCondition() : com.library_management.library_management_artifact.entity.ItemCondition.GOOD)
+                .condition(request.getCondition() != null ? request.getCondition() : ItemCondition.GOOD)
                 .status(request.getStatus() != null ? request.getStatus() : BookItemStatus.AVAILABLE)
                 .build();
 

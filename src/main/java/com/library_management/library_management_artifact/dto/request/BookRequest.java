@@ -19,7 +19,6 @@ public class BookRequest {
     private String publisher;
     private Integer publishedYear;
     private String description;
-    private String coverImageUrl;
 
     private Set<String> categoryNames = new HashSet<>();
 }

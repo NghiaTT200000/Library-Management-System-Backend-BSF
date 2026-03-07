@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.library_management.library_management_artifact.constant.ApiMessage;
 import com.library_management.library_management_artifact.dto.request.BookItemRequest;
 import com.library_management.library_management_artifact.dto.response.ApiResponse;
+import com.library_management.library_management_artifact.dto.response.BookItemDetailResponse;
 import com.library_management.library_management_artifact.dto.response.BookItemResponse;
 import com.library_management.library_management_artifact.service.BookItemService;
 
@@ -42,7 +43,7 @@ public class BookItemController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<BookItemResponse>> getById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<BookItemDetailResponse>> getById(@PathVariable UUID id) {
         return ResponseEntity
                 .status(ApiMessage.BOOK_ITEM_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.BOOK_ITEM_FETCHED.getMessage(),
@@ -50,7 +51,7 @@ public class BookItemController {
     }
 
     @GetMapping("/code/{itemCode}")
-    public ResponseEntity<ApiResponse<BookItemResponse>> getByItemCode(@PathVariable String itemCode) {
+    public ResponseEntity<ApiResponse<BookItemDetailResponse>> getByItemCode(@PathVariable String itemCode) {
         return ResponseEntity
                 .status(ApiMessage.BOOK_ITEM_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.BOOK_ITEM_FETCHED.getMessage(),

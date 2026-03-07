@@ -26,6 +26,9 @@ import com.library_management.library_management_artifact.dto.response.BookDetai
 import com.library_management.library_management_artifact.dto.response.BookResponse;
 import com.library_management.library_management_artifact.service.BookService;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -44,34 +47,25 @@ public class BookController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String author,
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) Boolean available,
             @PageableDefault(size = 10, sort = "title") Pageable pageable) {
         return ResponseEntity
                 .status(ApiMessage.BOOKS_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.BOOKS_FETCHED.getMessage(),
-                        bookService.getAll(search, author, category, available, pageable)));
+                        bookService.getAll(search, author, category, pageable)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<BookResponse>> getById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<BookDetailResponse>> getById(@PathVariable UUID id) {
         return ResponseEntity
                 .status(ApiMessage.BOOK_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.BOOK_FETCHED.getMessage(), bookService.getById(id)));
     }
 
-    @GetMapping("/{id}/detail")
-    @PreAuthorize("hasRole('ADMIN')")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<ApiResponse<BookDetailResponse>> getDetail(@PathVariable UUID id) {
-        return ResponseEntity
-                .status(ApiMessage.BOOK_FETCHED.getStatus())
-                .body(ApiResponse.success(ApiMessage.BOOK_FETCHED.getMessage(), bookService.getDetailById(id)));
-    }
-
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<ApiResponse<BookResponse>> create(
+    @RequestBody(content = @Content(encoding = @Encoding(name = "data", contentType = MediaType.APPLICATION_JSON_VALUE)))
+    public ResponseEntity<ApiResponse<BookDetailResponse>> create(
             @RequestPart("data") @Valid BookRequest request,
             @RequestPart(value = "file", required = false) MultipartFile file) {
         return ResponseEntity
@@ -82,7 +76,8 @@ public class BookController {
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<ApiResponse<BookResponse>> update(
+    @RequestBody(content = @Content(encoding = @Encoding(name = "data", contentType = MediaType.APPLICATION_JSON_VALUE)))
+    public ResponseEntity<ApiResponse<BookDetailResponse>> update(
             @PathVariable UUID id,
             @RequestPart("data") @Valid BookRequest request,
             @RequestPart(value = "file", required = false) MultipartFile file) {

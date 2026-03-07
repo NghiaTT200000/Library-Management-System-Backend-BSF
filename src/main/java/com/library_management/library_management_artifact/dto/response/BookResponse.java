@@ -23,6 +23,8 @@ public class BookResponse {
     private String description;
     private String coverImageUrl;
     private Set<CategoryResponse> categories;
+    private int totalCopies;
+    private int availableCopies;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -21,7 +21,6 @@ import com.library_management.library_management_artifact.dto.request.BookReques
 import com.library_management.library_management_artifact.dto.response.BookDetailResponse;
 import com.library_management.library_management_artifact.dto.response.BookResponse;
 import com.library_management.library_management_artifact.entity.Book;
-import com.library_management.library_management_artifact.entity.BookItemStatus;
 import com.library_management.library_management_artifact.entity.Category;
 import com.library_management.library_management_artifact.exception.BadRequestException;
 import com.library_management.library_management_artifact.exception.ResourceNotFoundException;
@@ -30,11 +29,11 @@ import com.library_management.library_management_artifact.mapper.BookMapper;
 import com.library_management.library_management_artifact.repository.BookRepository;
 import com.library_management.library_management_artifact.repository.CategoryRepository;
 
-import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class BookService {
 
     private final BookRepository bookRepository;
@@ -44,27 +43,21 @@ public class BookService {
     private final Cloudinary cloudinary;
     private final AppProperties appProperties;
 
-    public Page<BookResponse> getAll(String search, String author, String categoryName,
-                                     Boolean available, Pageable pageable) {
+    public Page<BookResponse> getAll(String search, String author, String categoryName, Pageable pageable) {
         Specification<Book> spec = Specification
                 .where(titleContains(search))
                 .and(authorContains(author))
-                .and(inCategory(categoryName))
-                .and(hasAvailableItems(available));
+                .and(inCategory(categoryName));
 
         return bookRepository.findAll(spec, pageable).map(bookMapper::toResponse);
     }
 
-    public BookResponse getById(UUID id) {
-        return bookMapper.toResponse(findOrThrow(id));
-    }
-
-    public BookDetailResponse getDetailById(UUID id) {
+    public BookDetailResponse getById(UUID id) {
         return bookDetailMapper.toDetailResponse(findOrThrow(id));
     }
 
     @Transactional
-    public BookResponse create(BookRequest request, MultipartFile file) {
+    public BookDetailResponse create(BookRequest request, MultipartFile file) {
         Book book = bookMapper.toEntity(request);
         book.setCategories(resolveCategories(request.getCategoryNames()));
         book = bookRepository.save(book);
@@ -72,18 +65,18 @@ public class BookService {
             book.setCoverImageUrl(uploadImage(book.getId(), file));
             book = bookRepository.save(book);
         }
-        return bookMapper.toResponse(book);
+        return bookDetailMapper.toDetailResponse(book);
     }
 
     @Transactional
-    public BookResponse update(UUID id, BookRequest request, MultipartFile file) {
+    public BookDetailResponse update(UUID id, BookRequest request, MultipartFile file) {
         Book book = findOrThrow(id);
         bookMapper.updateEntity(request, book);
         book.setCategories(resolveCategories(request.getCategoryNames()));
         if (file != null && !file.isEmpty()) {
             book.setCoverImageUrl(uploadImage(id, file));
         }
-        return bookMapper.toResponse(bookRepository.save(book));
+        return bookDetailMapper.toDetailResponse(bookRepository.save(book));
     }
 
     @Transactional
@@ -123,15 +116,6 @@ public class BookService {
             if (categoryName == null || categoryName.isBlank()) return null;
             var categories = root.join("categories");
             return cb.equal(cb.lower(categories.get("name")), categoryName.toLowerCase());
-        };
-    }
-
-    private Specification<Book> hasAvailableItems(Boolean available) {
-        return (root, query, cb) -> {
-            if (available == null || !available) return null;
-            if (query != null) query.distinct(true);
-            var items = root.join("items", JoinType.INNER);
-            return cb.equal(items.get("status"), BookItemStatus.AVAILABLE);
         };
     }
 
