@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,14 +13,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.library_management.library_management_artifact.constant.ApiMessage;
 import com.library_management.library_management_artifact.dto.request.BookRequest;
 import com.library_management.library_management_artifact.dto.response.ApiResponse;
+import com.library_management.library_management_artifact.dto.response.BookDetailResponse;
 import com.library_management.library_management_artifact.dto.response.BookResponse;
 import com.library_management.library_management_artifact.service.BookService;
 
@@ -41,11 +44,12 @@ public class BookController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String author,
             @RequestParam(required = false) String category,
+            @RequestParam(required = false) Boolean available,
             @PageableDefault(size = 10, sort = "title") Pageable pageable) {
         return ResponseEntity
                 .status(ApiMessage.BOOKS_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.BOOKS_FETCHED.getMessage(),
-                        bookService.getAll(search, author, category, pageable)));
+                        bookService.getAll(search, author, category, available, pageable)));
     }
 
     @GetMapping("/{id}")
@@ -55,23 +59,36 @@ public class BookController {
                 .body(ApiResponse.success(ApiMessage.BOOK_FETCHED.getMessage(), bookService.getById(id)));
     }
 
-    @PostMapping
+    @GetMapping("/{id}/detail")
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<ApiResponse<BookResponse>> create(@Valid @RequestBody BookRequest request) {
+    public ResponseEntity<ApiResponse<BookDetailResponse>> getDetail(@PathVariable UUID id) {
         return ResponseEntity
-                .status(ApiMessage.BOOK_CREATED.getStatus())
-                .body(ApiResponse.success(ApiMessage.BOOK_CREATED.getMessage(), bookService.create(request)));
+                .status(ApiMessage.BOOK_FETCHED.getStatus())
+                .body(ApiResponse.success(ApiMessage.BOOK_FETCHED.getMessage(), bookService.getDetailById(id)));
     }
 
-    @PutMapping("/{id}")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<ApiResponse<BookResponse>> create(
+            @RequestPart("data") @Valid BookRequest request,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+        return ResponseEntity
+                .status(ApiMessage.BOOK_CREATED.getStatus())
+                .body(ApiResponse.success(ApiMessage.BOOK_CREATED.getMessage(), bookService.create(request, file)));
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<ApiResponse<BookResponse>> update(
-            @PathVariable UUID id, @Valid @RequestBody BookRequest request) {
+            @PathVariable UUID id,
+            @RequestPart("data") @Valid BookRequest request,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
         return ResponseEntity
                 .status(ApiMessage.BOOK_UPDATED.getStatus())
-                .body(ApiResponse.success(ApiMessage.BOOK_UPDATED.getMessage(), bookService.update(id, request)));
+                .body(ApiResponse.success(ApiMessage.BOOK_UPDATED.getMessage(), bookService.update(id, request, file)));
     }
 
     @DeleteMapping("/{id}")

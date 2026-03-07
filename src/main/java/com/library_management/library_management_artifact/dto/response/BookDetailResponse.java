@@ -1,6 +1,7 @@
 package com.library_management.library_management_artifact.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookResponse {
+public class BookDetailResponse {
     private UUID id;
     private String isbn;
     private String title;
@@ -23,6 +24,9 @@ public class BookResponse {
     private String description;
     private String coverImageUrl;
     private Set<CategoryResponse> categories;
+    private List<BookItemResponse> items;
+    private int totalCopies;
+    private int availableCopies;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

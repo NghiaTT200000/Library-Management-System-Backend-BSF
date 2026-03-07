@@ -18,6 +18,7 @@ public class AppProperties {
     private Rag rag = new Rag();
     private Fine fine = new Fine();
     private Cors cors = new Cors();
+    private Cloudinary cloudinary = new Cloudinary();
 
     @Data
     public static class Jwt {
@@ -51,5 +52,13 @@ public class AppProperties {
         private List<String> allowedHeaders = List.of("*");
         private boolean allowCredentials = true;
         private long maxAge = 3600;
+    }
+
+    @Data
+    public static class Cloudinary {
+        private String cloudName;
+        private String apiKey;
+        private String apiSecret;
+        private String uploadFolder = "library/covers";
     }
 }

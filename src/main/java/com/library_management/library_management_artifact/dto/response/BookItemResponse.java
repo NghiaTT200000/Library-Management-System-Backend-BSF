@@ -1,8 +1,11 @@
 package com.library_management.library_management_artifact.dto.response;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
+
+import com.library_management.library_management_artifact.entity.BookItemStatus;
+import com.library_management.library_management_artifact.entity.ItemCondition;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,16 +16,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookResponse {
+public class BookItemResponse {
     private UUID id;
-    private String isbn;
-    private String title;
-    private String author;
-    private String publisher;
-    private Integer publishedYear;
+    private String itemCode;
+    private String locationCode;
     private String description;
-    private String coverImageUrl;
-    private Set<CategoryResponse> categories;
+    private LocalDate acquiredAt;
+    private ItemCondition condition;
+    private BookItemStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

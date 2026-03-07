@@ -38,8 +38,8 @@ public class BorrowRecord {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id", nullable = false)
-    private Book book;
+    @JoinColumn(name = "book_item_id", nullable = false)
+    private BookItem bookItem;
 
     private LocalDate borrowedAt;
     private LocalDate dueDate;
