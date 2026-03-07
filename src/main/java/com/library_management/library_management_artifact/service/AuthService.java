@@ -1,11 +1,26 @@
 package com.library_management.library_management_artifact.service;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.library_management.library_management_artifact.config.AppProperties;
 import com.library_management.library_management_artifact.constant.ApiMessage;
 import com.library_management.library_management_artifact.dto.request.ChangePasswordRequest;
 import com.library_management.library_management_artifact.dto.request.CreateUserRequest;
 import com.library_management.library_management_artifact.dto.request.LoginRequest;
 import com.library_management.library_management_artifact.dto.request.RegisterRequest;
 import com.library_management.library_management_artifact.dto.request.ResendVerificationRequest;
+import com.library_management.library_management_artifact.dto.request.VerifyEmailRequest;
 import com.library_management.library_management_artifact.dto.response.AuthResponse;
 import com.library_management.library_management_artifact.dto.response.RegisterResponse;
 import com.library_management.library_management_artifact.dto.response.UserResponse;
@@ -18,28 +33,21 @@ import com.library_management.library_management_artifact.exception.EmailNotVeri
 import com.library_management.library_management_artifact.exception.ForbiddenException;
 import com.library_management.library_management_artifact.exception.InvalidRefreshTokenException;
 import com.library_management.library_management_artifact.exception.ResourceNotFoundException;
-import com.library_management.library_management_artifact.config.AppProperties;
 import com.library_management.library_management_artifact.mapper.UserMapper;
 import com.library_management.library_management_artifact.repository.EmailVerificationTokenRepository;
 import com.library_management.library_management_artifact.repository.RefreshTokenRepository;
 import com.library_management.library_management_artifact.repository.UserRepository;
 import com.library_management.library_management_artifact.util.JwtUtils;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService implements UserDetailsService {
+
+    private static final String CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final int CODE_LENGTH = 6;
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final UserRepository userRepository;
     private final EmailVerificationTokenRepository verificationTokenRepository;
@@ -50,7 +58,6 @@ public class AuthService implements UserDetailsService {
     private final EmailService emailService;
     private final AppProperties appProperties;
 
-    // Called by JwtAuthenticationFilter on every authenticated request
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email)
@@ -77,12 +84,14 @@ public class AuthService implements UserDetailsService {
     }
 
     @Transactional
-    public void verifyEmail(String token) {
-        EmailVerificationToken evt = verificationTokenRepository.findByToken(token)
+    public void verifyEmail(VerifyEmailRequest request) {
+        EmailVerificationToken evt = verificationTokenRepository
+                .findByUserEmailAndToken(request.getEmail(), request.getCode())
                 .orElseThrow(() -> new BadRequestException(
                         ApiMessage.INVALID_VERIFICATION_TOKEN.getMessage()));
 
         if (evt.isExpired()) {
+            verificationTokenRepository.delete(evt);
             throw new BadRequestException(ApiMessage.INVALID_VERIFICATION_TOKEN.getMessage());
         }
 
@@ -153,7 +162,6 @@ public class AuthService implements UserDetailsService {
 
         User user = stored.getUser();
 
-        // Rotate: delete old, issue new refresh token
         refreshTokenRepository.delete(stored);
         String newRawRefreshToken = createRefreshToken(user);
         String newAccessToken = jwtUtils.generateAccessToken(user);
@@ -221,16 +229,15 @@ public class AuthService implements UserDetailsService {
         return userMapper.toResponse(user);
     }
 
-
     private void issueVerificationToken(User user) {
-        String token = UUID.randomUUID().toString();
+        String code = generateCode();
         EmailVerificationToken evt = EmailVerificationToken.builder()
-                .token(token)
+                .token(code)
                 .user(user)
                 .expiresAt(LocalDateTime.now().plusMinutes(appProperties.getEmailVerification().getExpiryMinutes()))
                 .build();
         verificationTokenRepository.save(evt);
-        emailService.sendVerificationEmail(user.getEmail(), user.getFullName(), token);
+        emailService.sendVerificationEmail(user.getEmail(), user.getFullName(), code);
     }
 
     private String createRefreshToken(User user) {
@@ -242,5 +249,13 @@ public class AuthService implements UserDetailsService {
                 .build();
         refreshTokenRepository.save(rt);
         return raw;
+    }
+
+    private String generateCode() {
+        StringBuilder sb = new StringBuilder(CODE_LENGTH);
+        for (int i = 0; i < CODE_LENGTH; i++) {
+            sb.append(CODE_CHARS.charAt(RANDOM.nextInt(CODE_CHARS.length())));
+        }
+        return sb.toString();
     }
 }

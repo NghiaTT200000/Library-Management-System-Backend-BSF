@@ -23,19 +23,17 @@ public class EmailService {
     private String fromAddress;
 
     @Async("emailExecutor")
-    public void sendVerificationEmail(String toEmail, String fullName, String token) {
+    public void sendVerificationEmail(String toEmail, String fullName, String code) {
         try {
-            String verifyLink = appProperties.getBaseUrl() + "/api/auth/verify?token=" + token;
-
             SimpleMailMessage mail = new SimpleMailMessage();
             mail.setFrom(fromAddress);
             mail.setTo(toEmail);
             mail.setSubject("Verify your Library account");
             mail.setText(
                 "Hi " + fullName + ",\n\n" +
-                "Thank you for registering. Click the link below to verify your email:\n\n" +
-                verifyLink + "\n\n" +
-                "This link expires in " + appProperties.getEmailVerification().getExpiryMinutes() + " minutes.\n\n" +
+                "Thank you for registering. Use the code below to verify your email:\n\n" +
+                "  " + code + "\n\n" +
+                "This code expires in " + appProperties.getEmailVerification().getExpiryMinutes() + " minutes.\n\n" +
                 "– Library Team"
             );
 

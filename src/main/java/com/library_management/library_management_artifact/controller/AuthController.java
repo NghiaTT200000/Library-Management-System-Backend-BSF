@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.library_management.library_management_artifact.constant.ApiMessage;
@@ -16,6 +15,7 @@ import com.library_management.library_management_artifact.dto.request.ChangePass
 import com.library_management.library_management_artifact.dto.request.LoginRequest;
 import com.library_management.library_management_artifact.dto.request.RegisterRequest;
 import com.library_management.library_management_artifact.dto.request.ResendVerificationRequest;
+import com.library_management.library_management_artifact.dto.request.VerifyEmailRequest;
 import com.library_management.library_management_artifact.dto.response.ApiResponse;
 import com.library_management.library_management_artifact.dto.response.AuthResponse;
 import com.library_management.library_management_artifact.dto.response.RegisterResponse;
@@ -60,9 +60,9 @@ public class AuthController {
                 .body(ApiResponse.success(ApiMessage.LOGIN_SUCCESS.getMessage(), data));
     }
 
-    @GetMapping("/verify")
-    public ResponseEntity<ApiResponse<Void>> verifyEmail(@RequestParam String token) {
-        authService.verifyEmail(token);
+    @PostMapping("/verify")
+    public ResponseEntity<ApiResponse<Void>> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+        authService.verifyEmail(request);
         return ResponseEntity
                 .status(ApiMessage.EMAIL_VERIFIED.getStatus())
                 .body(ApiResponse.success(ApiMessage.EMAIL_VERIFIED.getMessage()));
