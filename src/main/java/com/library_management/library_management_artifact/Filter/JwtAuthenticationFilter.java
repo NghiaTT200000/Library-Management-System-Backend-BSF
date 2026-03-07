@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
-    private final UserDetailsService userDetailsService; // Spring injects AuthService here
+    private final UserDetailsService userDetailsService; 
 
     @Override
     protected void doFilterInternal(

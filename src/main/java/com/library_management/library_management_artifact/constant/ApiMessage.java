@@ -32,6 +32,15 @@ public enum ApiMessage {
     ACCOUNT_DISABLED        ("Your account has been disabled. Please contact support.", false, HttpStatus.FORBIDDEN),
     INVALID_CURRENT_PASSWORD("Current password is incorrect",                           false, HttpStatus.BAD_REQUEST),
 
+    BOOK_CREATED    ("Book created successfully",    true,  HttpStatus.CREATED),
+    BOOK_FETCHED    ("Book fetched successfully",    true,  HttpStatus.OK),
+    BOOKS_FETCHED   ("Books fetched successfully",   true,  HttpStatus.OK),
+    BOOK_UPDATED    ("Book updated successfully",    true,  HttpStatus.OK),
+    BOOK_DELETED    ("Book deleted successfully",    true,  HttpStatus.OK),
+
+    CATEGORY_FETCHED    ("Category fetched successfully",    true,  HttpStatus.OK),
+    CATEGORIES_FETCHED  ("Categories fetched successfully",  true,  HttpStatus.OK),
+
     NOT_FOUND("Resource not found",false, HttpStatus.NOT_FOUND),
     FORBIDDEN("You do not have permission to do this",false, HttpStatus.FORBIDDEN),
     BAD_REQUEST("Bad request",false, HttpStatus.BAD_REQUEST),

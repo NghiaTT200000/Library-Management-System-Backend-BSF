@@ -12,13 +12,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponse {
+public class CategoryResponse {
     private UUID id;
-    private String email;
-    private String fullName;
-    private String phoneNumber;
-    private String role;
-    private boolean active;
+    private String name;
     private LocalDateTime createdAt;
-    private boolean isVerified;
 }

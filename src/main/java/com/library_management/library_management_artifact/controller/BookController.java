@@ -1,22 +1,86 @@
 package com.library_management.library_management_artifact.controller;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.library_management.library_management_artifact.constant.ApiMessage;
+import com.library_management.library_management_artifact.dto.request.BookRequest;
+import com.library_management.library_management_artifact.dto.response.ApiResponse;
+import com.library_management.library_management_artifact.dto.response.BookResponse;
+import com.library_management.library_management_artifact.service.BookService;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/books")
+@RequiredArgsConstructor
 @Tag(name = "Books", description = "Book management endpoints")
 public class BookController {
+
+    private final BookService bookService;
+
     @GetMapping
-    public List<String> getAll() {
-        ArrayList<String> exampleList = new ArrayList<>();
-        exampleList.add("Wuthering Heights");
-        return exampleList;
+    public ResponseEntity<ApiResponse<Page<BookResponse>>> getAll(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String author,
+            @RequestParam(required = false) String category,
+            @PageableDefault(size = 10, sort = "title") Pageable pageable) {
+        return ResponseEntity
+                .status(ApiMessage.BOOKS_FETCHED.getStatus())
+                .body(ApiResponse.success(ApiMessage.BOOKS_FETCHED.getMessage(),
+                        bookService.getAll(search, author, category, pageable)));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<BookResponse>> getById(@PathVariable UUID id) {
+        return ResponseEntity
+                .status(ApiMessage.BOOK_FETCHED.getStatus())
+                .body(ApiResponse.success(ApiMessage.BOOK_FETCHED.getMessage(), bookService.getById(id)));
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<ApiResponse<BookResponse>> create(@Valid @RequestBody BookRequest request) {
+        return ResponseEntity
+                .status(ApiMessage.BOOK_CREATED.getStatus())
+                .body(ApiResponse.success(ApiMessage.BOOK_CREATED.getMessage(), bookService.create(request)));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<ApiResponse<BookResponse>> update(
+            @PathVariable UUID id, @Valid @RequestBody BookRequest request) {
+        return ResponseEntity
+                .status(ApiMessage.BOOK_UPDATED.getStatus())
+                .body(ApiResponse.success(ApiMessage.BOOK_UPDATED.getMessage(), bookService.update(id, request)));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
+        bookService.delete(id);
+        return ResponseEntity
+                .status(ApiMessage.BOOK_DELETED.getStatus())
+                .body(ApiResponse.success(ApiMessage.BOOK_DELETED.getMessage()));
     }
 }

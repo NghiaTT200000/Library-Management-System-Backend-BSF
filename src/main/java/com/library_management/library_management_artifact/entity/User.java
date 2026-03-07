@@ -46,7 +46,9 @@ public class User implements UserDetails {
 
     private String phoneNumber;
 
-    private boolean isVerified;
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean isVerified = false;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
