@@ -28,10 +28,11 @@ public class FineService {
     private final FineRepository fineRepository;
     private final FineDetailMapper fineDetailMapper;
 
-    public Page<FineDetailResponse> getAll(User currentUser, Pageable pageable) {
-        if (currentUser.getRole() == Role.ADMIN) {
-            return fineRepository.findAll(pageable).map(fineDetailMapper::toDetailResponse);
-        }
+    public Page<FineDetailResponse> getAll(Pageable pageable) {
+        return fineRepository.findAll(pageable).map(fineDetailMapper::toDetailResponse);
+    }
+
+    public Page<FineDetailResponse> getMyFines(User currentUser, Pageable pageable) {
         return fineRepository.findByUserId(currentUser.getId(), pageable)
                 .map(fineDetailMapper::toDetailResponse);
     }

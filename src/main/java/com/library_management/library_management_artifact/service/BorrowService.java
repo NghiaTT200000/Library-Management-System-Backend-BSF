@@ -48,10 +48,10 @@ public class BorrowService {
     @Transactional
     public BorrowRecordDetailResponse borrow(BorrowRequest request) {
         User borrowUser = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         BookItem item = bookItemRepository.findById(request.getBookItemId())
-                .orElseThrow(() -> new ResourceNotFoundException("Book item not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Book item not found"));
 
         if (item.getStatus() != BookItemStatus.AVAILABLE) {
             throw new BadRequestException("Book item is not available for borrowing");
@@ -105,11 +105,12 @@ public class BorrowService {
         return borrowRecordDetailMapper.toDetailResponse(borrowRecordRepository.save(record));
     }
 
-    public Page<BorrowRecordDetailResponse> getAll(User currentUser, Pageable pageable) {
-        if (currentUser.getRole() == Role.ADMIN) {
-            return borrowRecordRepository.findAll(pageable)
-                    .map(borrowRecordDetailMapper::toDetailResponse);
-        }
+    public Page<BorrowRecordDetailResponse> getAll(Pageable pageable) {
+        return borrowRecordRepository.findAll(pageable)
+                .map(borrowRecordDetailMapper::toDetailResponse);
+    }
+
+    public Page<BorrowRecordDetailResponse> getMyBorrows(User currentUser, Pageable pageable) {
         return borrowRecordRepository.findByUserId(currentUser.getId(), pageable)
                 .map(borrowRecordDetailMapper::toDetailResponse);
     }

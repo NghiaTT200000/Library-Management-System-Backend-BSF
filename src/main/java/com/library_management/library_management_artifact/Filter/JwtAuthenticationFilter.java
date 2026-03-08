@@ -40,19 +40,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String token = authHeader.substring(7);
-        final String email = jwtUtils.extractUsername(token);
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        try {
+            final String email = jwtUtils.extractUsername(token);
 
-            if (jwtUtils.isValid(token, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities()
-                        );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+                if (jwtUtils.isValid(token, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails, null, userDetails.getAuthorities()
+                            );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (Exception e) {
+            // Invalid or expired token — continue without setting authentication
+            // Spring Security will handle the 401 via AuthenticationEntryPoint
         }
 
         filterChain.doFilter(request, response);

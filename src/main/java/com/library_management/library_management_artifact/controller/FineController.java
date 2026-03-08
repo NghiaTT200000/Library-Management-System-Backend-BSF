@@ -35,12 +35,21 @@ public class FineController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<FineDetailResponse>>> getAll(
+            @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
+        return ResponseEntity
+                .status(ApiMessage.FINES_FETCHED.getStatus())
+                .body(ApiResponse.success(ApiMessage.FINES_FETCHED.getMessage(),
+                        fineService.getAll(pageable)));
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<Page<FineDetailResponse>>> getMy(
             @AuthenticationPrincipal User currentUser,
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         return ResponseEntity
                 .status(ApiMessage.FINES_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.FINES_FETCHED.getMessage(),
-                        fineService.getAll(currentUser, pageable)));
+                        fineService.getMyFines(currentUser, pageable)));
     }
 
     @GetMapping("/{id}")

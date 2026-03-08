@@ -38,13 +38,23 @@ public class BorrowController {
     private final BorrowService borrowService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Page<BorrowRecordDetailResponse>>> getAll(
+            @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
+        return ResponseEntity
+                .status(ApiMessage.BORROWS_FETCHED.getStatus())
+                .body(ApiResponse.success(ApiMessage.BORROWS_FETCHED.getMessage(),
+                        borrowService.getAll(pageable)));
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<Page<BorrowRecordDetailResponse>>> getMy(
             @AuthenticationPrincipal User currentUser,
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         return ResponseEntity
                 .status(ApiMessage.BORROWS_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.BORROWS_FETCHED.getMessage(),
-                        borrowService.getAll(currentUser, pageable)));
+                        borrowService.getMyBorrows(currentUser, pageable)));
     }
 
     @GetMapping("/{id}")
