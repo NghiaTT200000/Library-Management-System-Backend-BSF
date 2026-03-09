@@ -84,13 +84,13 @@ public class BorrowService {
         return borrowRecordDetailMapper.toDetailResponse(borrowRecordRepository.save(record));
     }
 
-    public Page<BorrowRecordDetailResponse> getAll(Pageable pageable) {
-        return borrowRecordRepository.findAll(pageable)
+    public Page<BorrowRecordDetailResponse> getAll(String userEmail, String itemCode, Pageable pageable) {
+        return borrowRecordRepository.searchAll(userEmail, itemCode, pageable)
                 .map(borrowRecordDetailMapper::toDetailResponse);
     }
 
-    public Page<BorrowRecordDetailResponse> getMyBorrows(User currentUser, Pageable pageable) {
-        return borrowRecordRepository.findByUserId(currentUser.getId(), pageable)
+    public Page<BorrowRecordDetailResponse> getMyBorrows(User currentUser, String itemCode, Pageable pageable) {
+        return borrowRecordRepository.searchByUser(currentUser.getId(), itemCode, pageable)
                 .map(borrowRecordDetailMapper::toDetailResponse);
     }
 

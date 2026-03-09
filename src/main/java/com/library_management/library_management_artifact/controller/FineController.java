@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.library_management.library_management_artifact.constant.ApiMessage;
@@ -36,21 +37,24 @@ public class FineController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Page<FineDetailResponse>>> getAll(
+            @RequestParam(required = false) String userEmail,
+            @RequestParam(required = false) String itemCode,
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         return ResponseEntity
                 .status(ApiMessage.FINES_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.FINES_FETCHED.getMessage(),
-                        fineService.getAll(pageable)));
+                        fineService.getAll(userEmail, itemCode, pageable)));
     }
 
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<Page<FineDetailResponse>>> getMy(
             @AuthenticationPrincipal User currentUser,
+            @RequestParam(required = false) String itemCode,
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         return ResponseEntity
                 .status(ApiMessage.FINES_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.FINES_FETCHED.getMessage(),
-                        fineService.getMyFines(currentUser, pageable)));
+                        fineService.getMyFines(currentUser, itemCode, pageable)));
     }
 
     @GetMapping("/{id}")

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.library_management.library_management_artifact.constant.ApiMessage;
@@ -40,21 +41,24 @@ public class BorrowController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Page<BorrowRecordDetailResponse>>> getAll(
+            @RequestParam(required = false) String userEmail,
+            @RequestParam(required = false) String itemCode,
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         return ResponseEntity
                 .status(ApiMessage.BORROWS_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.BORROWS_FETCHED.getMessage(),
-                        borrowService.getAll(pageable)));
+                        borrowService.getAll(userEmail, itemCode, pageable)));
     }
 
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<Page<BorrowRecordDetailResponse>>> getMy(
             @AuthenticationPrincipal User currentUser,
+            @RequestParam(required = false) String itemCode,
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         return ResponseEntity
                 .status(ApiMessage.BORROWS_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.BORROWS_FETCHED.getMessage(),
-                        borrowService.getMyBorrows(currentUser, pageable)));
+                        borrowService.getMyBorrows(currentUser, itemCode, pageable)));
     }
 
     @GetMapping("/{id}")
