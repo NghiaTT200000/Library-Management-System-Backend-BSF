@@ -23,6 +23,51 @@ public class EmailService {
     private String fromAddress;
 
     @Async("emailExecutor")
+    public void sendFineCreatedEmail(String toEmail, String fullName, String bookTitle, int daysOverdue, double amount) {
+        try {
+            SimpleMailMessage mail = new SimpleMailMessage();
+            mail.setFrom(fromAddress);
+            mail.setTo(toEmail);
+            mail.setSubject("Library Fine Notice – Overdue Book");
+            mail.setText(
+                "Hi " + fullName + ",\n\n" +
+                "You have an overdue fine for the book: \"" + bookTitle + "\".\n\n" +
+                "  Days overdue : " + daysOverdue + "\n" +
+                "  Amount owed  : $" + String.format("%.2f", amount) + "\n\n" +
+                "Please return the book and settle your fine at the library.\n\n" +
+                "– Library Team"
+            );
+            mailSender.send(mail);
+            log.info("Fine created email sent to {}", toEmail);
+        } catch (Exception e) {
+            log.error("Failed to send fine created email to {}: {}", toEmail, e.getMessage());
+        }
+    }
+
+    @Async("emailExecutor")
+    public void sendUnpaidFineReminderEmail(String toEmail, String fullName, String bookTitle, int daysOverdue, double amount) {
+        try {
+            SimpleMailMessage mail = new SimpleMailMessage();
+            mail.setFrom(fromAddress);
+            mail.setTo(toEmail);
+            mail.setSubject("Library Reminder – Unpaid Fine");
+            mail.setText(
+                "Hi " + fullName + ",\n\n" +
+                "This is a reminder that you have an outstanding unpaid fine.\n\n" +
+                "  Book         : \"" + bookTitle + "\"\n" +
+                "  Days overdue : " + daysOverdue + "\n" +
+                "  Amount owed  : $" + String.format("%.2f", amount) + "\n\n" +
+                "Please visit the library to settle your balance.\n\n" +
+                "– Library Team"
+            );
+            mailSender.send(mail);
+            log.info("Unpaid fine reminder sent to {}", toEmail);
+        } catch (Exception e) {
+            log.error("Failed to send unpaid fine reminder to {}: {}", toEmail, e.getMessage());
+        }
+    }
+
+    @Async("emailExecutor")
     public void sendVerificationEmail(String toEmail, String fullName, String code) {
         try {
             SimpleMailMessage mail = new SimpleMailMessage();

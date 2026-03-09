@@ -1,8 +1,6 @@
 package com.library_management.library_management_artifact.service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,8 +16,6 @@ import com.library_management.library_management_artifact.entity.BookItem;
 import com.library_management.library_management_artifact.entity.BookItemStatus;
 import com.library_management.library_management_artifact.entity.BorrowRecord;
 import com.library_management.library_management_artifact.entity.BorrowStatus;
-import com.library_management.library_management_artifact.entity.Fine;
-import com.library_management.library_management_artifact.entity.FineStatus;
 import com.library_management.library_management_artifact.entity.Role;
 import com.library_management.library_management_artifact.entity.User;
 import com.library_management.library_management_artifact.exception.BadRequestException;
@@ -28,7 +24,6 @@ import com.library_management.library_management_artifact.exception.ResourceNotF
 import com.library_management.library_management_artifact.mapper.BorrowRecordDetailMapper;
 import com.library_management.library_management_artifact.repository.BookItemRepository;
 import com.library_management.library_management_artifact.repository.BorrowRecordRepository;
-import com.library_management.library_management_artifact.repository.FineRepository;
 import com.library_management.library_management_artifact.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -41,7 +36,6 @@ public class BorrowService {
     private final BorrowRecordRepository borrowRecordRepository;
     private final BookItemRepository bookItemRepository;
     private final UserRepository userRepository;
-    private final FineRepository fineRepository;
     private final BorrowRecordDetailMapper borrowRecordDetailMapper;
     private final AppProperties appProperties;
 
@@ -87,21 +81,6 @@ public class BorrowService {
         item.setStatus(BookItemStatus.AVAILABLE);
         bookItemRepository.save(item);
 
-        AppProperties.Fine cfg = appProperties.getFine();
-        long daysLate = ChronoUnit.DAYS.between(record.getDueDate(), today);
-        long daysOverdue = daysLate - cfg.getGracePeriodDays();
-
-        if (daysOverdue > 0) {
-            double amount = Math.min(daysOverdue * cfg.getRatePerDay(), cfg.getMaxAmount());
-            fineRepository.save(Fine.builder()
-                    .borrowRecord(record)
-                    .user(record.getUser())
-                    .daysOverdue((int) daysOverdue)
-                    .amount(BigDecimal.valueOf(amount))
-                    .status(FineStatus.UNPAID)
-                    .build());
-        }
-
         return borrowRecordDetailMapper.toDetailResponse(borrowRecordRepository.save(record));
     }
 
@@ -127,6 +106,32 @@ public class BorrowService {
         return borrowRecordRepository.findByBookItemId(itemId).stream()
                 .map(borrowRecordDetailMapper::toDetailResponse)
                 .toList();
+    }
+
+    @Transactional
+    public BorrowRecordDetailResponse borrowOverdue(UUID bookItemId, UUID userId, int daysOverdueBy) {
+        User borrowUser = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        BookItem item = bookItemRepository.findById(bookItemId)
+                .orElseThrow(() -> new ResourceNotFoundException("Book item not found"));
+
+        if (item.getStatus() != BookItemStatus.AVAILABLE) {
+            throw new BadRequestException("Book item is not available for borrowing");
+        }
+
+        LocalDate dueDate = LocalDate.now().minusDays(daysOverdueBy);
+        BorrowRecord record = BorrowRecord.builder()
+                .user(borrowUser)
+                .bookItem(item)
+                .borrowedAt(dueDate.minusDays(appProperties.getFine().getLoanPeriodDays()))
+                .dueDate(dueDate)
+                .build();
+
+        item.setStatus(BookItemStatus.BORROWED);
+        bookItemRepository.save(item);
+
+        return borrowRecordDetailMapper.toDetailResponse(borrowRecordRepository.save(record));
     }
 
     private BorrowRecord findOrThrow(UUID id) {

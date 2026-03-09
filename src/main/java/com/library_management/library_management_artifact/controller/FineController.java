@@ -34,6 +34,7 @@ public class FineController {
     private final FineService fineService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Page<FineDetailResponse>>> getAll(
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         return ResponseEntity
@@ -53,12 +54,11 @@ public class FineController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<FineDetailResponse>> getById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<FineDetailResponse>> getById(@PathVariable UUID id, @AuthenticationPrincipal User currentUser) {
         return ResponseEntity
                 .status(ApiMessage.FINE_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.FINE_FETCHED.getMessage(),
-                        fineService.getById(id)));
+                        fineService.getByIdForUser(id, currentUser)));
     }
 
     @PostMapping("/{id}/pay")

@@ -12,13 +12,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.library_management.library_management_artifact.constant.ApiMessage;
 import com.library_management.library_management_artifact.dto.request.CreateUserRequest;
 import com.library_management.library_management_artifact.dto.response.ApiResponse;
+import com.library_management.library_management_artifact.dto.response.BorrowRecordDetailResponse;
 import com.library_management.library_management_artifact.dto.response.UserResponse;
 import com.library_management.library_management_artifact.service.AuthService;
+import com.library_management.library_management_artifact.service.BorrowService;
+import com.library_management.library_management_artifact.service.FineSchedulerService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +35,8 @@ import lombok.RequiredArgsConstructor;
 public class AdminController {
 
     private final AuthService authService;
+    private final BorrowService borrowService;
+    private final FineSchedulerService fineSchedulerService;
 
     @PostMapping("/users")
     public ResponseEntity<ApiResponse<UserResponse>> createUser(
@@ -56,5 +62,27 @@ public class AdminController {
         return ResponseEntity
                 .status(ApiMessage.USER_DEACTIVATED.getStatus())
                 .body(ApiResponse.success(ApiMessage.USER_DEACTIVATED.getMessage()));
+    }
+
+    @PostMapping("/test/overdue-borrow")
+    public ResponseEntity<ApiResponse<BorrowRecordDetailResponse>> createOverdueBorrow(
+            @RequestParam UUID bookItemId,
+            @RequestParam UUID userId,
+            @RequestParam(defaultValue = "5") int daysOverdueBy
+    ) {
+        BorrowRecordDetailResponse data = borrowService.borrowOverdue(bookItemId, userId, daysOverdueBy);
+        return ResponseEntity.ok(ApiResponse.success("Overdue borrow record created for testing", data));
+    }
+
+    @PostMapping("/scheduler/process-fines")
+    public ResponseEntity<ApiResponse<Void>> triggerProcessFines() {
+        fineSchedulerService.processFines();
+        return ResponseEntity.ok(ApiResponse.success("Fine processing job triggered successfully"));
+    }
+
+    @PostMapping("/scheduler/send-reminders")
+    public ResponseEntity<ApiResponse<Void>> triggerSendReminders() {
+        fineSchedulerService.sendUnpaidFineReminders();
+        return ResponseEntity.ok(ApiResponse.success("Unpaid fine reminder job triggered successfully"));
     }
 }

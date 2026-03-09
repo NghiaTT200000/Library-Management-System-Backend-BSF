@@ -37,10 +37,6 @@ public class FineService {
                 .map(fineDetailMapper::toDetailResponse);
     }
 
-    public FineDetailResponse getById(UUID id) {
-        return fineDetailMapper.toDetailResponse(findOrThrow(id));
-    }
-
     @Transactional
     public FineDetailResponse pay(UUID id) {
         Fine fine = findOrThrow(id);

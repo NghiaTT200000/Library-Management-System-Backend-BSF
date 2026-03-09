@@ -24,4 +24,5 @@ public class BorrowRecordDetailResponse {
     private LocalDate returnedAt;
     private BorrowStatus status;
     private LocalDateTime createdAt;
+    private FineSummaryResponse fine;
 }
