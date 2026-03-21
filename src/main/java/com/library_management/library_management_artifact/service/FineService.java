@@ -28,13 +28,13 @@ public class FineService {
     private final FineRepository fineRepository;
     private final FineDetailMapper fineDetailMapper;
 
-    public Page<FineDetailResponse> getAll(String userEmail, String itemCode, Pageable pageable) {
-        return fineRepository.searchAll(userEmail, itemCode, pageable)
+    public Page<FineDetailResponse> getAll(String userEmail, String itemCode, String bookTitle, Pageable pageable) {
+        return fineRepository.searchAll(userEmail, itemCode, bookTitle, pageable)
                 .map(fineDetailMapper::toDetailResponse);
     }
 
-    public Page<FineDetailResponse> getMyFines(User currentUser, String itemCode, Pageable pageable) {
-        return fineRepository.searchByUser(currentUser.getId(), itemCode, pageable)
+    public Page<FineDetailResponse> getMyFines(User currentUser, String itemCode, String bookTitle, Pageable pageable) {
+        return fineRepository.searchByUser(currentUser.getId(), itemCode, bookTitle, pageable)
                 .map(fineDetailMapper::toDetailResponse);
     }
 

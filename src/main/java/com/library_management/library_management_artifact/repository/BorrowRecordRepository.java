@@ -25,14 +25,18 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, UUID
 
     @Query("SELECT b FROM BorrowRecord b WHERE " +
            "(:userEmail IS NULL OR LOWER(b.user.email) LIKE LOWER(CONCAT('%', :userEmail, '%'))) AND " +
-           "(:itemCode IS NULL OR LOWER(b.bookItem.itemCode) LIKE LOWER(CONCAT('%', :itemCode, '%')))")
+           "(:itemCode IS NULL OR LOWER(b.bookItem.itemCode) LIKE LOWER(CONCAT('%', :itemCode, '%'))) AND " +
+           "(:bookTitle IS NULL OR LOWER(b.bookItem.book.title) LIKE LOWER(CONCAT('%', :bookTitle, '%')))")
     Page<BorrowRecord> searchAll(@Param("userEmail") String userEmail,
                                  @Param("itemCode") String itemCode,
+                                 @Param("bookTitle") String bookTitle,
                                  Pageable pageable);
 
     @Query("SELECT b FROM BorrowRecord b WHERE b.user.id = :userId AND " +
-           "(:itemCode IS NULL OR LOWER(b.bookItem.itemCode) LIKE LOWER(CONCAT('%', :itemCode, '%')))")
+           "(:itemCode IS NULL OR LOWER(b.bookItem.itemCode) LIKE LOWER(CONCAT('%', :itemCode, '%'))) AND " +
+           "(:bookTitle IS NULL OR LOWER(b.bookItem.book.title) LIKE LOWER(CONCAT('%', :bookTitle, '%')))")
     Page<BorrowRecord> searchByUser(@Param("userId") UUID userId,
                                     @Param("itemCode") String itemCode,
+                                    @Param("bookTitle") String bookTitle,
                                     Pageable pageable);
 }

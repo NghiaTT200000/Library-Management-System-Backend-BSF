@@ -43,12 +43,13 @@ public class BookItemController {
     public ResponseEntity<ApiResponse<Page<BookItemResponse>>> getAll(
             @RequestParam(required = false) String bookIsbn,
             @RequestParam(required = false) String itemCode,
+            @RequestParam(required = false) String bookTitle,
             @RequestParam(required = false) String status,
             @PageableDefault(size = 10, sort = "acquiredAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity
                 .status(ApiMessage.BOOK_ITEMS_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.BOOK_ITEMS_FETCHED.getMessage(),
-                        bookItemService.getAll(bookIsbn, itemCode, status, pageable)));
+                        bookItemService.getAll(bookIsbn, itemCode, bookTitle, status, pageable)));
     }
 
     @GetMapping("/book/{isbn}")

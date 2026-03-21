@@ -33,12 +33,18 @@ public class BookItemService {
     private final BookItemDetailMapper bookItemDetailMapper;
 
     @Transactional(readOnly = true)
-    public Page<BookItemResponse> getAll(String bookIsbn, String itemCode, String status, Pageable pageable) {
+    public Page<BookItemResponse> getAll(String bookIsbn, String itemCode, String bookTitle, String status, Pageable pageable) {
         Specification<BookItem> spec = Specification
                 .where(bookIsbnContains(bookIsbn))
                 .and(itemCodeContains(itemCode))
+                .and(bookTitleContains(bookTitle))
                 .and(statusEquals(status));
         return bookItemRepository.findAll(spec, pageable).map(bookItemMapper::toResponse);
+    }
+
+    private Specification<BookItem> bookTitleContains(String title) {
+        return (root, query, cb) -> title == null || title.isBlank() ? null
+                : cb.like(cb.lower(root.get("book").get("title")), "%" + title.toLowerCase() + "%");
     }
 
     private Specification<BookItem> bookIsbnContains(String isbn) {

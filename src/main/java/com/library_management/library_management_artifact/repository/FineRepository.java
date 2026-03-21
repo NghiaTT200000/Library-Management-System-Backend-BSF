@@ -21,14 +21,18 @@ public interface FineRepository extends JpaRepository<Fine, UUID> {
 
     @Query("SELECT f FROM Fine f WHERE " +
            "(:userEmail IS NULL OR LOWER(f.user.email) LIKE LOWER(CONCAT('%', :userEmail, '%'))) AND " +
-           "(:itemCode IS NULL OR LOWER(f.borrowRecord.bookItem.itemCode) LIKE LOWER(CONCAT('%', :itemCode, '%')))")
+           "(:itemCode IS NULL OR LOWER(f.borrowRecord.bookItem.itemCode) LIKE LOWER(CONCAT('%', :itemCode, '%'))) AND " +
+           "(:bookTitle IS NULL OR LOWER(f.borrowRecord.bookItem.book.title) LIKE LOWER(CONCAT('%', :bookTitle, '%')))")
     Page<Fine> searchAll(@Param("userEmail") String userEmail,
                          @Param("itemCode") String itemCode,
+                         @Param("bookTitle") String bookTitle,
                          Pageable pageable);
 
     @Query("SELECT f FROM Fine f WHERE f.user.id = :userId AND " +
-           "(:itemCode IS NULL OR LOWER(f.borrowRecord.bookItem.itemCode) LIKE LOWER(CONCAT('%', :itemCode, '%')))")
+           "(:itemCode IS NULL OR LOWER(f.borrowRecord.bookItem.itemCode) LIKE LOWER(CONCAT('%', :itemCode, '%'))) AND " +
+           "(:bookTitle IS NULL OR LOWER(f.borrowRecord.bookItem.book.title) LIKE LOWER(CONCAT('%', :bookTitle, '%')))")
     Page<Fine> searchByUser(@Param("userId") UUID userId,
                              @Param("itemCode") String itemCode,
+                             @Param("bookTitle") String bookTitle,
                              Pageable pageable);
 }

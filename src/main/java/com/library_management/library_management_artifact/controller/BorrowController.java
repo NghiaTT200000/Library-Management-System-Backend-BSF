@@ -43,22 +43,24 @@ public class BorrowController {
     public ResponseEntity<ApiResponse<Page<BorrowRecordDetailResponse>>> getAll(
             @RequestParam(required = false) String userEmail,
             @RequestParam(required = false) String itemCode,
+            @RequestParam(required = false) String bookTitle,
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         return ResponseEntity
                 .status(ApiMessage.BORROWS_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.BORROWS_FETCHED.getMessage(),
-                        borrowService.getAll(userEmail, itemCode, pageable)));
+                        borrowService.getAll(userEmail, itemCode, bookTitle, pageable)));
     }
 
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<Page<BorrowRecordDetailResponse>>> getMy(
             @AuthenticationPrincipal User currentUser,
             @RequestParam(required = false) String itemCode,
+            @RequestParam(required = false) String bookTitle,
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         return ResponseEntity
                 .status(ApiMessage.BORROWS_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.BORROWS_FETCHED.getMessage(),
-                        borrowService.getMyBorrows(currentUser, itemCode, pageable)));
+                        borrowService.getMyBorrows(currentUser, itemCode, bookTitle, pageable)));
     }
 
     @GetMapping("/{id}")

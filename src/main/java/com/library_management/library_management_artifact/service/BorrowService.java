@@ -86,13 +86,13 @@ public class BorrowService {
         return borrowRecordDetailMapper.toDetailResponse(borrowRecordRepository.save(record));
     }
 
-    public Page<BorrowRecordDetailResponse> getAll(String userEmail, String itemCode, Pageable pageable) {
-        return borrowRecordRepository.searchAll(userEmail, itemCode, pageable)
+    public Page<BorrowRecordDetailResponse> getAll(String userEmail, String itemCode, String bookTitle, Pageable pageable) {
+        return borrowRecordRepository.searchAll(userEmail, itemCode, bookTitle, pageable)
                 .map(borrowRecordDetailMapper::toDetailResponse);
     }
 
-    public Page<BorrowRecordDetailResponse> getMyBorrows(User currentUser, String itemCode, Pageable pageable) {
-        return borrowRecordRepository.searchByUser(currentUser.getId(), itemCode, pageable)
+    public Page<BorrowRecordDetailResponse> getMyBorrows(User currentUser, String itemCode, String bookTitle, Pageable pageable) {
+        return borrowRecordRepository.searchByUser(currentUser.getId(), itemCode, bookTitle, pageable)
                 .map(borrowRecordDetailMapper::toDetailResponse);
     }
 
@@ -142,7 +142,7 @@ public class BorrowService {
 
     public List<BorrowRecordDetailResponse> getRecentBorrows(int limit) {
         return borrowRecordRepository
-                .searchAll(null, null, PageRequest.of(0, limit, Sort.by("createdAt").descending()))
+                .searchAll(null, null, null, PageRequest.of(0, limit, Sort.by("createdAt").descending()))
                 .map(borrowRecordDetailMapper::toDetailResponse)
                 .toList();
     }

@@ -39,22 +39,24 @@ public class FineController {
     public ResponseEntity<ApiResponse<Page<FineDetailResponse>>> getAll(
             @RequestParam(required = false) String userEmail,
             @RequestParam(required = false) String itemCode,
+            @RequestParam(required = false) String bookTitle,
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         return ResponseEntity
                 .status(ApiMessage.FINES_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.FINES_FETCHED.getMessage(),
-                        fineService.getAll(userEmail, itemCode, pageable)));
+                        fineService.getAll(userEmail, itemCode, bookTitle, pageable)));
     }
 
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<Page<FineDetailResponse>>> getMy(
             @AuthenticationPrincipal User currentUser,
             @RequestParam(required = false) String itemCode,
+            @RequestParam(required = false) String bookTitle,
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         return ResponseEntity
                 .status(ApiMessage.FINES_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.FINES_FETCHED.getMessage(),
-                        fineService.getMyFines(currentUser, itemCode, pageable)));
+                        fineService.getMyFines(currentUser, itemCode, bookTitle, pageable)));
     }
 
     @GetMapping("/{id}")
