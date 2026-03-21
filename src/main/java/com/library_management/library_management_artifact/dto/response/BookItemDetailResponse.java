@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.library_management.library_management_artifact.entity.BookItemStatus;
-import com.library_management.library_management_artifact.entity.ItemCondition;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,7 +21,6 @@ public class BookItemDetailResponse {
     private String locationCode;
     private String description;
     private LocalDate acquiredAt;
-    private ItemCondition condition;
     private BookItemStatus status;
     private BookResponse book;
     private LocalDateTime createdAt;

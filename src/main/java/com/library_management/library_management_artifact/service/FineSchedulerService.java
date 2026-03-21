@@ -63,7 +63,7 @@ public class FineSchedulerService {
                     .status(FineStatus.UNPAID)
                     .build();
             fineRepository.save(fine);
-            log.info("Created fine for borrow record {} — {} days overdue, ${}", record.getId(), daysOverdue, amount);
+            log.info("Created fine for borrow record {} — {} days overdue, {} VND", record.getId(), daysOverdue, (long) amount);
             emailService.sendFineCreatedEmail(record.getUser().getEmail(), record.getUser().getFullName(), bookTitle, (int) daysOverdue, amount);
         }
 
@@ -79,7 +79,7 @@ public class FineSchedulerService {
                     fine.setDaysOverdue((int) daysOverdue);
                     fine.setAmount(BigDecimal.valueOf(amount));
                     fineRepository.save(fine);
-                    log.info("Updated fine {} — now {} days overdue, ${}", fine.getId(), daysOverdue, amount);
+                    log.info("Updated fine {} — now {} days overdue, {} VND", fine.getId(), daysOverdue, (long) amount);
                 }
             });
         }

@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -132,6 +134,17 @@ public class BorrowService {
         bookItemRepository.save(item);
 
         return borrowRecordDetailMapper.toDetailResponse(borrowRecordRepository.save(record));
+    }
+
+    public long countActiveBorrows() {
+        return borrowRecordRepository.countByStatus(BorrowStatus.ACTIVE);
+    }
+
+    public List<BorrowRecordDetailResponse> getRecentBorrows(int limit) {
+        return borrowRecordRepository
+                .searchAll(null, null, PageRequest.of(0, limit, Sort.by("createdAt").descending()))
+                .map(borrowRecordDetailMapper::toDetailResponse)
+                .toList();
     }
 
     private BorrowRecord findOrThrow(UUID id) {

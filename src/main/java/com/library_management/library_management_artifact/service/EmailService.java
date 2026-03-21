@@ -33,7 +33,7 @@ public class EmailService {
                 "Hi " + fullName + ",\n\n" +
                 "You have an overdue fine for the book: \"" + bookTitle + "\".\n\n" +
                 "  Days overdue : " + daysOverdue + "\n" +
-                "  Amount owed  : $" + String.format("%.2f", amount) + "\n\n" +
+                "  Amount owed  : " + String.format("%,.0f VND", amount) + "\n\n" +
                 "Please return the book and settle your fine at the library.\n\n" +
                 "– Library Team"
             );
@@ -56,7 +56,7 @@ public class EmailService {
                 "This is a reminder that you have an outstanding unpaid fine.\n\n" +
                 "  Book         : \"" + bookTitle + "\"\n" +
                 "  Days overdue : " + daysOverdue + "\n" +
-                "  Amount owed  : $" + String.format("%.2f", amount) + "\n\n" +
+                "  Amount owed  : " + String.format("%,.0f VND", amount) + "\n\n" +
                 "Please visit the library to settle your balance.\n\n" +
                 "– Library Team"
             );

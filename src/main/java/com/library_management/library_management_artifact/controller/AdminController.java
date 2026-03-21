@@ -19,7 +19,10 @@ import com.library_management.library_management_artifact.constant.ApiMessage;
 import com.library_management.library_management_artifact.dto.request.CreateUserRequest;
 import com.library_management.library_management_artifact.dto.response.ApiResponse;
 import com.library_management.library_management_artifact.dto.response.BorrowRecordDetailResponse;
+import com.library_management.library_management_artifact.dto.response.DashboardStatsResponse;
 import com.library_management.library_management_artifact.dto.response.UserResponse;
+import com.library_management.library_management_artifact.repository.BookItemRepository;
+import com.library_management.library_management_artifact.repository.BookRepository;
 import com.library_management.library_management_artifact.service.AuthService;
 import com.library_management.library_management_artifact.service.BorrowService;
 import com.library_management.library_management_artifact.service.FineSchedulerService;
@@ -37,6 +40,20 @@ public class AdminController {
     private final AuthService authService;
     private final BorrowService borrowService;
     private final FineSchedulerService fineSchedulerService;
+    private final BookRepository bookRepository;
+    private final BookItemRepository bookItemRepository;
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<ApiResponse<DashboardStatsResponse>> getDashboard() {
+        DashboardStatsResponse data = DashboardStatsResponse.builder()
+                .totalUsers(authService.countUsers())
+                .totalBooks(bookRepository.count())
+                .totalBookItems(bookItemRepository.count())
+                .activeBorrowings(borrowService.countActiveBorrows())
+                .recentBorrowings(borrowService.getRecentBorrows(5))
+                .build();
+        return ResponseEntity.ok(ApiResponse.success("Dashboard stats fetched", data));
+    }
 
     @PostMapping("/users")
     public ResponseEntity<ApiResponse<UserResponse>> createUser(

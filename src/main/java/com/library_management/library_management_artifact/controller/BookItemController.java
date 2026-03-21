@@ -3,15 +3,20 @@ package com.library_management.library_management_artifact.controller;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.library_management.library_management_artifact.constant.ApiMessage;
@@ -34,12 +39,24 @@ public class BookItemController {
 
     private final BookItemService bookItemService;
 
-    @GetMapping("/book/{bookId}")
-    public ResponseEntity<ApiResponse<List<BookItemResponse>>> getByBookId(@PathVariable UUID bookId) {
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<BookItemResponse>>> getAll(
+            @RequestParam(required = false) String bookIsbn,
+            @RequestParam(required = false) String itemCode,
+            @RequestParam(required = false) String status,
+            @PageableDefault(size = 10, sort = "acquiredAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity
                 .status(ApiMessage.BOOK_ITEMS_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.BOOK_ITEMS_FETCHED.getMessage(),
-                        bookItemService.getByBookId(bookId)));
+                        bookItemService.getAll(bookIsbn, itemCode, status, pageable)));
+    }
+
+    @GetMapping("/book/{isbn}")
+    public ResponseEntity<ApiResponse<List<BookItemResponse>>> getByBookIsbn(@PathVariable String isbn) {
+        return ResponseEntity
+                .status(ApiMessage.BOOK_ITEMS_FETCHED.getStatus())
+                .body(ApiResponse.success(ApiMessage.BOOK_ITEMS_FETCHED.getMessage(),
+                        bookItemService.getByBookIsbn(isbn)));
     }
 
     @GetMapping("/{id}")
@@ -77,6 +94,16 @@ public class BookItemController {
                 .status(ApiMessage.BOOK_ITEM_UPDATED.getStatus())
                 .body(ApiResponse.success(ApiMessage.BOOK_ITEM_UPDATED.getMessage(),
                         bookItemService.update(id, request)));
+    }
+
+    @PatchMapping("/{id}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<ApiResponse<BookItemResponse>> activate(@PathVariable UUID id) {
+        return ResponseEntity
+                .status(ApiMessage.BOOK_ITEM_UPDATED.getStatus())
+                .body(ApiResponse.success(ApiMessage.BOOK_ITEM_UPDATED.getMessage(),
+                        bookItemService.activate(id)));
     }
 
     @DeleteMapping("/{id}")

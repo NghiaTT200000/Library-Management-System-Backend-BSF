@@ -21,6 +21,7 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, UUID
     Optional<BorrowRecord> findByBookItemIdAndStatus(UUID bookItemId, BorrowStatus status);
     List<BorrowRecord> findAllByStatusAndDueDateBefore(BorrowStatus status, LocalDate date);
     List<BorrowRecord> findAllByStatus(BorrowStatus status);
+    long countByStatus(BorrowStatus status);
 
     @Query("SELECT b FROM BorrowRecord b WHERE " +
            "(:userEmail IS NULL OR LOWER(b.user.email) LIKE LOWER(CONCAT('%', :userEmail, '%'))) AND " +

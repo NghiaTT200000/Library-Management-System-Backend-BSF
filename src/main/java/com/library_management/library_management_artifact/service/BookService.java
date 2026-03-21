@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -43,48 +42,66 @@ public class BookService {
     private final Cloudinary cloudinary;
     private final AppProperties appProperties;
 
-    public Page<BookResponse> getAll(String search, String author, String categoryName, Pageable pageable) {
+    public Page<BookResponse> getAll(String search, String isbn, String author, String categoryName, Pageable pageable) {
         Specification<Book> spec = Specification
                 .where(titleContains(search))
+                .and(isbnContains(isbn))
                 .and(authorContains(author))
                 .and(inCategory(categoryName));
 
         return bookRepository.findAll(spec, pageable).map(bookMapper::toResponse);
     }
 
-    public BookDetailResponse getById(UUID id) {
-        return bookDetailMapper.toDetailResponse(findOrThrow(id));
+    public BookDetailResponse getById(String isbn) {
+        return bookDetailMapper.toDetailResponse(findOrThrow(isbn));
     }
 
     @Transactional
     public BookDetailResponse create(BookRequest request, MultipartFile file) {
+        if (bookRepository.existsById(request.getIsbn())) {
+            throw new BadRequestException("ISBN already exists: " + request.getIsbn());
+        }
         Book book = bookMapper.toEntity(request);
         book.setCategories(resolveCategories(request.getCategoryNames()));
         book = bookRepository.save(book);
         if (file != null && !file.isEmpty()) {
-            book.setCoverImageUrl(uploadImage(book.getId(), file));
+            book.setCoverImageUrl(uploadImage(book.getIsbn(), file));
             book = bookRepository.save(book);
         }
         return bookDetailMapper.toDetailResponse(book);
     }
 
     @Transactional
-    public BookDetailResponse update(UUID id, BookRequest request, MultipartFile file) {
-        Book book = findOrThrow(id);
+    public BookDetailResponse update(String isbn, BookRequest request, MultipartFile file) {
+        Book book = findOrThrow(isbn);
         bookMapper.updateEntity(request, book);
         book.setCategories(resolveCategories(request.getCategoryNames()));
         if (file != null && !file.isEmpty()) {
-            book.setCoverImageUrl(uploadImage(id, file));
+            book.setCoverImageUrl(uploadImage(isbn, file));
         }
         return bookDetailMapper.toDetailResponse(bookRepository.save(book));
     }
 
     @Transactional
-    public void delete(UUID id) {
-        bookRepository.delete(findOrThrow(id));
+    public BookResponse activate(String isbn) {
+        Book book = findOrThrow(isbn);
+        book.setActive(true);
+        return bookMapper.toResponse(bookRepository.save(book));
     }
 
-    private String uploadImage(UUID bookId, MultipartFile file) {
+    @Transactional
+    public BookResponse deactivate(String isbn) {
+        Book book = findOrThrow(isbn);
+        book.setActive(false);
+        return bookMapper.toResponse(bookRepository.save(book));
+    }
+
+    @Transactional
+    public void delete(String isbn) {
+        bookRepository.delete(findOrThrow(isbn));
+    }
+
+    private String uploadImage(String bookIsbn, MultipartFile file) {
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new BadRequestException("File must be an image");
@@ -93,7 +110,7 @@ public class BookService {
             Map<?, ?> result = cloudinary.uploader().upload(file.getBytes(),
                     ObjectUtils.asMap(
                             "folder", appProperties.getCloudinary().getUploadFolder(),
-                            "public_id", bookId.toString(),
+                            "public_id", bookIsbn,
                             "overwrite", true));
             return (String) result.get("secure_url");
         } catch (IOException e) {
@@ -104,6 +121,11 @@ public class BookService {
     private Specification<Book> titleContains(String q) {
         return (root, query, cb) -> q == null || q.isBlank() ? null
                 : cb.like(cb.lower(root.get("title")), "%" + q.toLowerCase() + "%");
+    }
+
+    private Specification<Book> isbnContains(String q) {
+        return (root, query, cb) -> q == null || q.isBlank() ? null
+                : cb.like(root.get("isbn"), "%" + q + "%");
     }
 
     private Specification<Book> authorContains(String q) {
@@ -119,8 +141,8 @@ public class BookService {
         };
     }
 
-    private Book findOrThrow(UUID id) {
-        return bookRepository.findById(id)
+    private Book findOrThrow(String isbn) {
+        return bookRepository.findById(isbn)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
     }
 

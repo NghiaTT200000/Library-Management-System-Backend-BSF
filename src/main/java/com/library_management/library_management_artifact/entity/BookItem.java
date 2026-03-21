@@ -50,10 +50,6 @@ public class BookItem {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private ItemCondition condition = ItemCondition.GOOD;
-
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
     private BookItemStatus status = BookItemStatus.AVAILABLE;
 
     private LocalDateTime createdAt;

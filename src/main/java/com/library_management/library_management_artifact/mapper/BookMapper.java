@@ -18,9 +18,9 @@ public abstract class BookMapper {
     @Autowired
     protected BookItemRepository bookItemRepository;
 
-    @Mapping(target = "id",                   ignore = true)
     @Mapping(target = "categories",           ignore = true)
     @Mapping(target = "items",                ignore = true)
+    @Mapping(target = "active",               ignore = true)
     @Mapping(target = "createdAt",            ignore = true)
     @Mapping(target = "updatedAt",            ignore = true)
     @Mapping(target = "coverImageUrl",        ignore = true)
@@ -34,12 +34,13 @@ public abstract class BookMapper {
 
     @AfterMapping
     protected void computeCounts(Book book, @MappingTarget BookResponse.BookResponseBuilder builder) {
-        builder.totalCopies((int) bookItemRepository.countByBookId(book.getId()));
-        builder.availableCopies((int) bookItemRepository.countByBookIdAndStatus(book.getId(), BookItemStatus.AVAILABLE));
+        builder.totalCopies((int) bookItemRepository.countByBookIsbn(book.getIsbn()));
+        builder.availableCopies((int) bookItemRepository.countByBookIsbnAndStatus(book.getIsbn(), BookItemStatus.AVAILABLE));
     }
 
-    @Mapping(target = "id",                   ignore = true)
+    @Mapping(target = "isbn",                 ignore = true)
     @Mapping(target = "categories",           ignore = true)
+    @Mapping(target = "active",               ignore = true)
     @Mapping(target = "items",                ignore = true)
     @Mapping(target = "createdAt",            ignore = true)
     @Mapping(target = "updatedAt",            ignore = true)

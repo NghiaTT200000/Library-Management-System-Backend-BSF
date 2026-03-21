@@ -23,7 +23,7 @@ public abstract class BookDetailMapper {
 
     @AfterMapping
     protected void computeCopyCounts(Book book, @MappingTarget BookDetailResponse.BookDetailResponseBuilder builder) {
-        builder.totalCopies((int) bookItemRepository.countByBookId(book.getId()));
-        builder.availableCopies((int) bookItemRepository.countByBookIdAndStatus(book.getId(), BookItemStatus.AVAILABLE));
+        builder.totalCopies((int) bookItemRepository.countByBookIsbn(book.getIsbn()));
+        builder.availableCopies((int) bookItemRepository.countByBookIsbnAndStatus(book.getIsbn(), BookItemStatus.AVAILABLE));
     }
 }

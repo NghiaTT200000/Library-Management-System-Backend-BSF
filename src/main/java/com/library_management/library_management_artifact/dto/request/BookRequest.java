@@ -10,12 +10,13 @@ import lombok.Data;
 public class BookRequest {
 
     @NotBlank
+    private String isbn;
+
+    @NotBlank
     private String title;
 
     @NotBlank
     private String author;
-
-    private String isbn;
     private String publisher;
     private Integer publishedYear;
     private String description;

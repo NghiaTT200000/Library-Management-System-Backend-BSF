@@ -1,7 +1,5 @@
 package com.library_management.library_management_artifact.controller;
 
-import java.util.UUID;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -10,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -45,20 +44,21 @@ public class BookController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<BookResponse>>> getAll(
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String isbn,
             @RequestParam(required = false) String author,
             @RequestParam(required = false) String category,
             @PageableDefault(size = 10, sort = "title") Pageable pageable) {
         return ResponseEntity
                 .status(ApiMessage.BOOKS_FETCHED.getStatus())
                 .body(ApiResponse.success(ApiMessage.BOOKS_FETCHED.getMessage(),
-                        bookService.getAll(search, author, category, pageable)));
+                        bookService.getAll(search, isbn, author, category, pageable)));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<BookDetailResponse>> getById(@PathVariable UUID id) {
+    @GetMapping("/{isbn}")
+    public ResponseEntity<ApiResponse<BookDetailResponse>> getById(@PathVariable String isbn) {
         return ResponseEntity
                 .status(ApiMessage.BOOK_FETCHED.getStatus())
-                .body(ApiResponse.success(ApiMessage.BOOK_FETCHED.getMessage(), bookService.getById(id)));
+                .body(ApiResponse.success(ApiMessage.BOOK_FETCHED.getMessage(), bookService.getById(isbn)));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -73,24 +73,42 @@ public class BookController {
                 .body(ApiResponse.success(ApiMessage.BOOK_CREATED.getMessage(), bookService.create(request, file)));
     }
 
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{isbn}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     @RequestBody(content = @Content(encoding = @Encoding(name = "data", contentType = MediaType.APPLICATION_JSON_VALUE)))
     public ResponseEntity<ApiResponse<BookDetailResponse>> update(
-            @PathVariable UUID id,
+            @PathVariable String isbn,
             @RequestPart("data") @Valid BookRequest request,
             @RequestPart(value = "file", required = false) MultipartFile file) {
         return ResponseEntity
                 .status(ApiMessage.BOOK_UPDATED.getStatus())
-                .body(ApiResponse.success(ApiMessage.BOOK_UPDATED.getMessage(), bookService.update(id, request, file)));
+                .body(ApiResponse.success(ApiMessage.BOOK_UPDATED.getMessage(), bookService.update(isbn, request, file)));
     }
 
-    @DeleteMapping("/{id}")
+    @PatchMapping("/{isbn}/activate")
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
-        bookService.delete(id);
+    public ResponseEntity<ApiResponse<BookResponse>> activate(@PathVariable String isbn) {
+        return ResponseEntity
+                .status(ApiMessage.BOOK_UPDATED.getStatus())
+                .body(ApiResponse.success(ApiMessage.BOOK_UPDATED.getMessage(), bookService.activate(isbn)));
+    }
+
+    @PatchMapping("/{isbn}/deactivate")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<ApiResponse<BookResponse>> deactivate(@PathVariable String isbn) {
+        return ResponseEntity
+                .status(ApiMessage.BOOK_UPDATED.getStatus())
+                .body(ApiResponse.success(ApiMessage.BOOK_UPDATED.getMessage(), bookService.deactivate(isbn)));
+    }
+
+    @DeleteMapping("/{isbn}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String isbn) {
+        bookService.delete(isbn);
         return ResponseEntity
                 .status(ApiMessage.BOOK_DELETED.getStatus())
                 .body(ApiResponse.success(ApiMessage.BOOK_DELETED.getMessage()));

@@ -11,7 +11,6 @@ import com.library_management.library_management_artifact.entity.Book;
 import com.library_management.library_management_artifact.entity.BookItem;
 import com.library_management.library_management_artifact.entity.BookItemStatus;
 import com.library_management.library_management_artifact.entity.Category;
-import com.library_management.library_management_artifact.entity.ItemCondition;
 import com.library_management.library_management_artifact.entity.Role;
 import com.library_management.library_management_artifact.entity.User;
 import com.library_management.library_management_artifact.repository.BookItemRepository;
@@ -124,7 +123,6 @@ public class DataSeeder implements CommandLineRunner {
                 .itemCode(prefix + "-" + String.format("%03d", i))
                 .locationCode(locationCode)
                 .acquiredAt(LocalDate.of(2023, 1, 1))
-                .condition(ItemCondition.GOOD)
                 .status(BookItemStatus.AVAILABLE)
                 .build());
         }
